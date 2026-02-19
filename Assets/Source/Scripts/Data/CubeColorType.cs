@@ -1,0 +1,23 @@
+public enum CubeColorType
+{
+    Black = 0,
+    Blue = 1,
+    Brown = 2,
+    Cyan = 3,
+    DarkBlue = 4,
+    DarkPurple = 5,
+    DarkRed = 6,
+    Gray = 7,
+    Green = 8,
+    LightBrown = 9,
+    LightCyan = 10,
+    LightGreen = 11,
+    LightPurple = 12,
+    LightYellow = 13,
+    Orange = 14,
+    Pink = 15,
+    Purple = 16,
+    Red = 17,
+    Violet = 18,
+    Yellow = 19,
+}

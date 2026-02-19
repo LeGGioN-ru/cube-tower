@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80924c7453de0c74198cbb7cd092a3ab, type: 3}
+  m_Name: Cubes Frontend Data
+  m_EditorClassIdentifier: 
+  _cubesData:
+  - Name: Black
+    _key: 0
+    _sprite: {fileID: 21300000, guid: 99dafa64a23befe40a1b471034a4f53a, type: 3}
+  - Name: Blue
+    _key: 1
+    _sprite: {fileID: 21300000, guid: f8f67a8e1c9272a43b9d04318846c283, type: 3}
+  - Name: Brown
+    _key: 2
+    _sprite: {fileID: 21300000, guid: 1f9f093431d86d1459621d8d9cf1ba8e, type: 3}
+  - Name: Cyan
+    _key: 3
+    _sprite: {fileID: 21300000, guid: a52e20aebba033e42b432bbd6993633b, type: 3}
+  - Name: DarkBlue
+    _key: 4
+    _sprite: {fileID: 21300000, guid: 73c177bf6a450f0448f95e6eb6328040, type: 3}
+  - Name: DarkPurple
+    _key: 5
+    _sprite: {fileID: 21300000, guid: 7fd677658cae83b4ea7469c1334092c9, type: 3}
+  - Name: DarkRed
+    _key: 6
+    _sprite: {fileID: 21300000, guid: b797962014d46394eb31cb7891b5ba23, type: 3}
+  - Name: Gray
+    _key: 7
+    _sprite: {fileID: 21300000, guid: 8fd0b878dfaec6a43afedcbb234efbc1, type: 3}
+  - Name: Green
+    _key: 8
+    _sprite: {fileID: 21300000, guid: 080846e29a39a7046a75565c04a4d718, type: 3}
+  - Name: LightBrown
+    _key: 9
+    _sprite: {fileID: 21300000, guid: 3216653aaaf743f439de4e2386a6c953, type: 3}
+  - Name: LightCyan
+    _key: 10
+    _sprite: {fileID: 21300000, guid: 5bfd755bee9ee3a4683d127819e52707, type: 3}
+  - Name: LightGreen
+    _key: 11
+    _sprite: {fileID: 21300000, guid: 6fdbccf68b202e44a9a642f7b83c97c3, type: 3}
+  - Name: LightPurple
+    _key: 12
+    _sprite: {fileID: 21300000, guid: df60094d614e3d041a67a9cdc435629a, type: 3}
+  - Name: LightYellow
+    _key: 13
+    _sprite: {fileID: 21300000, guid: b0e14d1a46d1d4648b31b02e2073da43, type: 3}
+  - Name: Orange
+    _key: 14
+    _sprite: {fileID: 21300000, guid: dfe0e583e55458f4c94dfed17245d795, type: 3}
+  - Name: Pink
+    _key: 15
+    _sprite: {fileID: 21300000, guid: f29c17901697dae469ca71cbe907a3ef, type: 3}
+  - Name: Purple
+    _key: 16
+    _sprite: {fileID: 21300000, guid: 60a3bdc517ef53341a85046d8d83bd36, type: 3}
+  - Name: Red
+    _key: 17
+    _sprite: {fileID: 21300000, guid: ebcb1329122245e409242f06658fac50, type: 3}
+  - Name: Violet
+    _key: 18
+    _sprite: {fileID: 21300000, guid: 76bccbe03ed08f14ba1b2472ac1bebe9, type: 3}
+  - Name: Yellow
+    _key: 19
+    _sprite: {fileID: 21300000, guid: fcf3c266761087e4b958b728afd4a3ec, type: 3}
