@@ -128,9 +128,7 @@ public class TowerZone : PlacableZone<PhantomCube>
         GameCubeView gameCubeView = presenter.CubeView as GameCubeView;
 
         if (gameCubeView == null || indexToRemove == -1)
-        {
             return;
-        }
 
         float heightGap = 0f;
 
@@ -141,15 +139,20 @@ public class TowerZone : PlacableZone<PhantomCube>
         gameCubeView.transform.DOKill();
         Destroy(gameCubeView.gameObject);
 
+
         if (indexToRemove >= _presenters.Count)
+        {
+            _gameSaveManager.SaveProgress();
             return;
+        }
 
         ShiftStackDown(indexToRemove, heightGap);
     }
 
     private void ShiftStackDown(int startIndex, float dropAmount)
     {
-        if (startIndex >= _presenters.Count) return;
+        if (startIndex >= _presenters.Count)
+            return;
 
         Sequence shiftSequence = DOTween.Sequence();
 
