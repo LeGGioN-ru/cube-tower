@@ -17,13 +17,16 @@ public class TowerZone : PlacableZone<PhantomCube>
     [Inject] private IGameSaveManager _gameSaveManager;
 
     private List<CubePresenter> _presenters = new List<CubePresenter>();
+    private bool _isPlacing;
 
     public IReadOnlyList<CubePresenter> Presenters => _presenters;
 
     public override void PlaceElement(PhantomCube phantomCube)
     {
-        if (_presenters.Contains(phantomCube.Presenter))
+        if (_isPlacing || _presenters.Contains(phantomCube.Presenter))
             return;
+
+        _isPlacing = true;
 
         if (_presenters.Count == 0)
         {
@@ -83,7 +86,6 @@ public class TowerZone : PlacableZone<PhantomCube>
         );
 
         presenter.CubeView.transform.position = startPos;
-
         presenter.CubeView.transform
             .DOJump(endPos, 4, 1, 0.5f)
             .OnComplete(() => onComplete?.Invoke(presenter));
@@ -91,11 +93,18 @@ public class TowerZone : PlacableZone<PhantomCube>
 
     private Vector3 GetNextStackPosition(CubeView lastView, Bounds lastBounds)
     {
+        var firstCubeTransform = _presenters[0].CubeView.transform;
         float firstCubeWidth = _presenters[0].CubeView.GetComponent<Collider2D>().bounds.size.x;
+
+        float minX = firstCubeTransform.position.x - (firstCubeWidth * 0.5f);
+        float maxX = firstCubeTransform.position.x + (firstCubeWidth * 0.5f);
+
         float maxOffset = firstCubeWidth * 0.5f;
         float randomOffset = Random.Range(-maxOffset, maxOffset);
 
         float targetX = lastView.transform.position.x + randomOffset;
+        targetX = Mathf.Clamp(targetX, minX, maxX);
+
         float targetY = lastView.transform.position.y + lastBounds.size.y;
 
         return new Vector3(targetX, targetY, lastView.transform.position.z);
@@ -104,6 +113,7 @@ public class TowerZone : PlacableZone<PhantomCube>
     private void HandleFailedPlacement(CubePresenter presenter)
     {
         SpriteRenderer spriteRenderer = presenter.CubeView.GetComponentInChildren<SpriteRenderer>();
+        _isPlacing = false;
 
         if (spriteRenderer != null)
         {
@@ -119,6 +129,7 @@ public class TowerZone : PlacableZone<PhantomCube>
     {
         _presenters.Add(presenter);
         _gameSaveManager.SaveProgress();
+        _isPlacing = false;
     }
 
     public void RemoveElement(CubePresenter presenter)
@@ -134,7 +145,7 @@ public class TowerZone : PlacableZone<PhantomCube>
 
         heightGap = gameCubeView.Collider2D.bounds.size.y;
 
-        _presenters.RemoveAt(indexToRemove);
+        _presenters.Remove(presenter);
 
         gameCubeView.transform.DOKill();
         Destroy(gameCubeView.gameObject);

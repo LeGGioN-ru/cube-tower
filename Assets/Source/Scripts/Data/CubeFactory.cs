@@ -12,10 +12,17 @@ public class CubeFactory
         _diContainer = diContainer;
     }
 
-    public CubePresenter Create(CubeView template, CubeModel cubeModel, Transform parent)
+    public CubePresenter Create(CubeView template, CubeModel sourceModel, Transform parent)
     {
         CubeView cubeView = _diContainer.InstantiatePrefabForComponent<CubeView>(template, parent);
-        CubePresenter cubePresenter = new CubePresenter(cubeModel, cubeView, _frontendData.TakeSpriteByKey(cubeModel.ColorType));
+        CubeModel cubeModel = new CubeModel()
+        {
+            ColorType = sourceModel.ColorType,
+            PositionX = sourceModel.PositionX,
+            PositionY = sourceModel.PositionY,
+            PositionZ = sourceModel.PositionZ
+        };
+        CubePresenter cubePresenter = new CubePresenter(cubeModel, cubeView, _frontendData.TakeSpriteByKey(sourceModel.ColorType));
         _diContainer.Inject(cubePresenter);
 
         return cubePresenter;

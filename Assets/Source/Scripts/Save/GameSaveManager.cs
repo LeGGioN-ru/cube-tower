@@ -39,6 +39,7 @@ public class GameSaveManager : MonoBehaviour, IGameSaveManager
         if (PlayerPrefs.HasKey(SaveKey))
         {
             string json = PlayerPrefs.GetString(SaveKey);
+
             SaveData data = JsonUtility.FromJson<SaveData>(json);
             List<CubePresenter> presenters = new List<CubePresenter>();
 
