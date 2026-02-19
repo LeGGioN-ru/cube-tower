@@ -146,6 +146,7 @@ public class TowerZone : PlacableZone<PhantomCube>
         heightGap = gameCubeView.Collider2D.bounds.size.y;
 
         _presenters.Remove(presenter);
+        presenter.Dispose();
 
         gameCubeView.transform.DOKill();
         Destroy(gameCubeView.gameObject);
