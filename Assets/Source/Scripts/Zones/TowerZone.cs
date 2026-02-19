@@ -117,10 +117,15 @@ public class TowerZone : PlacableZone<PhantomCube>
 
         if (spriteRenderer != null)
         {
-            spriteRenderer.DOFade(0f, 0.5f).OnComplete(() => { Destroy(presenter.CubeView.gameObject); });
+            spriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
+            {
+                presenter.Dispose();
+                Destroy(presenter.CubeView.gameObject);
+            });
         }
         else
         {
+            presenter.Dispose();
             Destroy(presenter.CubeView.gameObject);
         }
     }
