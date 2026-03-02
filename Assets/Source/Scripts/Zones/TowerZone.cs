@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using Zenject;
@@ -16,19 +15,19 @@ public class TowerZone : PlacableZone<PhantomCube>
     [Inject] private NotificationManager _notificationManager;
     [Inject] private IGameSaveManager _gameSaveManager;
 
-    private List<CubePresenter> _presenters = new List<CubePresenter>();
+    private TowerModel _towerModel = new TowerModel();
     private bool _isPlacing;
 
-    public IReadOnlyList<CubePresenter> Presenters => _presenters;
+    public IReadOnlyList<CubePresenter> Presenters => _towerModel.Presenters;
 
     public override void PlaceElement(PhantomCube phantomCube)
     {
-        if (_isPlacing || _presenters.Contains(phantomCube.Presenter))
+        if (_isPlacing || _towerModel.Contains(phantomCube.Presenter))
             return;
 
         _isPlacing = true;
 
-        if (_presenters.Count == 0)
+        if (_towerModel.Count == 0)
         {
             _notificationManager.Notify(LocalizationKeys.Localization.FIRST_CUBE_PLACED);
 
@@ -41,11 +40,11 @@ public class TowerZone : PlacableZone<PhantomCube>
         }
         else
         {
-            CubeView lastCubeView = _presenters.Last().CubeView;
-            Bounds lastBounds = lastCubeView.GetComponent<Collider2D>().bounds;
-            Vector2 checkPos = (Vector2)lastCubeView.transform.position + Vector2.up * lastBounds.size.y;
+            GameCubeView lastView = _towerModel.Last().CubeView as GameCubeView;
+            Bounds lastBounds = lastView.Collider2D.bounds;
+            Vector2 checkPos = (Vector2)lastView.transform.position + Vector2.up * lastBounds.size.y;
 
-            Vector3 targetPosition = GetNextStackPosition(lastCubeView, lastBounds);
+            Vector3 targetPosition = GetNextStackPosition(lastView, lastBounds);
 
             if (Utility.TryGetOverlapComponent(checkPos, _detectionSize, _zoneLayer, out PhantomCube foundPhantom))
             {
@@ -74,7 +73,7 @@ public class TowerZone : PlacableZone<PhantomCube>
 
     public void LoadPresenters(List<CubePresenter> presenters)
     {
-        _presenters = presenters;
+        _towerModel.LoadPresenters(presenters);
     }
 
     private void SpawnAndJump(PhantomCube sourcePhantom, Vector3 startPos, Vector3 endPos, Action<CubePresenter> onComplete)
@@ -86,18 +85,18 @@ public class TowerZone : PlacableZone<PhantomCube>
         );
 
         presenter.CubeView.transform.position = startPos;
-        presenter.CubeView.transform
-            .DOJump(endPos, 4, 1, 0.5f)
+
+        CubeAnimator.PlayJump(presenter.CubeView.transform, endPos)
             .OnComplete(() => onComplete?.Invoke(presenter));
     }
 
-    private Vector3 GetNextStackPosition(CubeView lastView, Bounds lastBounds)
+    private Vector3 GetNextStackPosition(GameCubeView lastView, Bounds lastBounds)
     {
-        var firstCubeTransform = _presenters[0].CubeView.transform;
-        float firstCubeWidth = _presenters[0].CubeView.GetComponent<Collider2D>().bounds.size.x;
+        GameCubeView firstView = _towerModel[0].CubeView as GameCubeView;
+        float firstCubeWidth = firstView.Collider2D.bounds.size.x;
 
-        float minX = firstCubeTransform.position.x - (firstCubeWidth * 0.5f);
-        float maxX = firstCubeTransform.position.x + (firstCubeWidth * 0.5f);
+        float minX = firstView.transform.position.x - firstCubeWidth * 0.5f;
+        float maxX = firstView.transform.position.x + firstCubeWidth * 0.5f;
 
         float maxOffset = firstCubeWidth * 0.5f;
         float randomOffset = Random.Range(-maxOffset, maxOffset);
@@ -112,52 +111,33 @@ public class TowerZone : PlacableZone<PhantomCube>
 
     private void HandleFailedPlacement(CubePresenter presenter)
     {
-        SpriteRenderer spriteRenderer = presenter.CubeView.GetComponentInChildren<SpriteRenderer>();
         _isPlacing = false;
-
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
-            {
-                presenter.Dispose();
-                Destroy(presenter.CubeView.gameObject);
-            });
-        }
-        else
-        {
-            presenter.Dispose();
-            Destroy(presenter.CubeView.gameObject);
-        }
+        CubeAnimator.PlayFail(presenter.CubeView as GameCubeView, presenter.Dispose);
     }
 
     private void OnSuccessJump(CubePresenter presenter)
     {
-        _presenters.Add(presenter);
+        _towerModel.Add(presenter);
         _gameSaveManager.SaveProgress();
         _isPlacing = false;
     }
 
     public void RemoveElement(CubePresenter presenter)
     {
-        int indexToRemove = _presenters.IndexOf(presenter);
-
+        int indexToRemove = _towerModel.IndexOf(presenter);
         GameCubeView gameCubeView = presenter.CubeView as GameCubeView;
 
         if (gameCubeView == null || indexToRemove == -1)
             return;
 
-        float heightGap = 0f;
+        float heightGap = gameCubeView.Collider2D.bounds.size.y;
 
-        heightGap = gameCubeView.Collider2D.bounds.size.y;
-
-        _presenters.Remove(presenter);
+        _towerModel.Remove(presenter);
         presenter.Dispose();
 
-        gameCubeView.transform.DOKill();
-        Destroy(gameCubeView.gameObject);
+        CubeAnimator.PlayRemove(gameCubeView);
 
-
-        if (indexToRemove >= _presenters.Count)
+        if (indexToRemove >= _towerModel.Count)
         {
             _gameSaveManager.SaveProgress();
             return;
@@ -168,24 +148,19 @@ public class TowerZone : PlacableZone<PhantomCube>
 
     private void ShiftStackDown(int startIndex, float dropAmount)
     {
-        if (startIndex >= _presenters.Count)
+        if (startIndex >= _towerModel.Count)
             return;
 
         Sequence shiftSequence = DOTween.Sequence();
 
-        for (int i = startIndex; i < _presenters.Count; i++)
+        for (int i = startIndex; i < _towerModel.Count; i++)
         {
-            var upperCube = _presenters[i].CubeView;
+            CubeView cubeView = _towerModel[i].CubeView;
 
-            if (upperCube != null)
+            if (cubeView != null)
             {
-                upperCube.transform.DOKill();
-
-                float targetY = upperCube.transform.position.y - dropAmount;
-
-                shiftSequence.Join(upperCube.transform
-                    .DOMoveY(targetY, 0.4f)
-                    .SetEase(Ease.OutBounce));
+                float targetY = cubeView.transform.position.y - dropAmount;
+                shiftSequence.Join(CubeAnimator.PlayShift(cubeView.transform, targetY));
             }
         }
 
@@ -195,12 +170,12 @@ public class TowerZone : PlacableZone<PhantomCube>
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (_presenters == null || _presenters.Count == 0) return;
+        if (_towerModel == null || _towerModel.Count == 0) return;
 
-        var lastView = _presenters.Last().CubeView;
+        GameCubeView lastView = _towerModel.Last().CubeView as GameCubeView;
         if (lastView == null) return;
 
-        Bounds lastBounds = lastView.GetComponent<Collider2D>().bounds;
+        Bounds lastBounds = lastView.Collider2D.bounds;
         Vector3 centerPos = lastView.transform.position + Vector3.up * lastBounds.size.y;
 
         Gizmos.color = new Color(0, 1, 0, 0.3f);
@@ -208,10 +183,10 @@ public class TowerZone : PlacableZone<PhantomCube>
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(centerPos, _detectionSize);
 
-        var firstView = _presenters[0].CubeView;
+        GameCubeView firstView = _towerModel[0].CubeView as GameCubeView;
         if (firstView != null)
         {
-            float firstWidth = firstView.GetComponent<Collider2D>().bounds.size.x;
+            float firstWidth = firstView.Collider2D.bounds.size.x;
             float maxOffset = firstWidth * 0.5f;
 
             Gizmos.color = Color.red;

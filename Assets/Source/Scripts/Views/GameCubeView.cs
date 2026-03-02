@@ -7,6 +7,7 @@ public class GameCubeView : CubeView
 
     public override Sprite CurrentSprite => _spriteRenderer.sprite;
     public Collider2D Collider2D => _collider2D;
+    public SpriteRenderer SpriteRenderer => _spriteRenderer;
 
     public override void UpdateSprite(Sprite sprite)
     {
